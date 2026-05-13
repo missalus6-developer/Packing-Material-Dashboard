@@ -153,22 +153,23 @@ input.pq{width:58px;background:var(--bg3);border:1px solid var(--border);border-
 <div class="sbox">
   <h1>&#9679; PM Inventory System</h1>
   <p class="sub">
-    Enter your Web App URL once — it will be saved permanently in this browser.<br>
-    Your FMS data from all three spreadsheets will load automatically.
+    Select your name and role to open the dashboard.
   </p>
 
   <div id="err-msg"></div>
   <div id="ok-msg"></div>
 
-  <label class="lbl">Web App URL <span>*</span></label>
-  <div class="url-row">
-    <input class="fi" type="url" id="inp-url" placeholder="https://script.google.com/macros/s/.../exec">
-    <button class="btn-test" onclick="testConn()">&#9654; Test</button>
+  <div id="url-section">
+    <label class="lbl">Web App URL <span>*</span> <span style="font-weight:400;color:var(--muted)">(Admin only — one time setup)</span></label>
+    <div class="url-row">
+      <input class="fi" type="password" id="inp-url" placeholder="Paste Web App URL here..." autocomplete="off">
+      <button class="btn-test" onclick="testConn()">&#9654; Test</button>
+    </div>
   </div>
 
   <label class="lbl">Your Name <span>*</span></label>
   <select class="fi" id="inp-name">
-    <option value="">-- Test the URL first --</option>
+    <option value="">-- Select your name --</option>
   </select>
 
   <label class="lbl">Your Role <span>*</span></label>
@@ -179,14 +180,6 @@ input.pq{width:58px;background:var(--bg3);border:1px solid var(--border);border-
   </select>
 
   <button class="btn-go" onclick="goDash()">Open Dashboard &rarr;</button>
-
-  <div class="hint">
-    <b>Where to find the Web App URL?</b><br>
-    Apps Script &rarr; Deploy &rarr; Manage Deployments &rarr; Copy URL<br><br>
-    <b>How to set Spreadsheet IDs?</b><br>
-    Open <code>WebApp_English.gs</code> &rarr; update <code>SPREADSHEET_IDS</code> with all three IDs.<br>
-    ID is found in the sheet URL: <code>docs.google.com/spreadsheets/d/<b>ID_HERE</b>/edit</code>
-  </div>
 </div>
 </div>
 
@@ -246,10 +239,15 @@ var activeSource = 'All'; // 'All', 'Tablet', 'Capsule', 'Oncology'
 window.onload = function() {
   var s = load();
   if (s && s.url) {
+    // URL already saved — hide URL section, auto-load staff names
+    document.getElementById('url-section').style.display = 'none';
     document.getElementById('inp-url').value = s.url;
     if (s.role) document.getElementById('inp-role').value = s.role;
     fetchStaff(s.url, s.name);
+    // Update subtitle
+    document.querySelector('.sbox .sub').textContent = 'Select your name and role to continue.';
   }
+  // If no URL saved yet, URL section stays visible for first-time admin setup
 };
 
 function load(){ try{ return JSON.parse(localStorage.getItem(SK)||'null'); }catch(e){ return null; } }
@@ -318,7 +316,13 @@ function goDash() {
   var url  = document.getElementById('inp-url').value.trim();
   var name = document.getElementById('inp-name').value.trim();
   var role = document.getElementById('inp-role').value;
-  if (!url)  { showErr('Web App URL is required'); return; }
+
+  if (!url) {
+    // URL section might be hidden — show it so admin can enter URL
+    document.getElementById('url-section').style.display = 'block';
+    showErr('Web App URL is required. Please enter it above.');
+    return;
+  }
   if (!name) { showErr('Please select your name'); return; }
 
   API = url; USER = name; ROLE = role;
@@ -342,9 +346,15 @@ function goDash() {
 }
 
 function switchU() {
+  // Show setup screen but keep URL hidden — users only change name/role
+  var s = load();
   document.getElementById('app').style.display   = 'none';
   document.getElementById('setup').style.display = 'flex';
-  document.getElementById('inp-url').value = API;
+  document.getElementById('url-section').style.display = 'none';
+  if (s && s.url) {
+    document.getElementById('inp-url').value = s.url;
+    fetchStaff(s.url, s.name);
+  }
 }
 
 // ---- REFRESH ALL DATA ----
