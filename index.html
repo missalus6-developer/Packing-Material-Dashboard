@@ -99,6 +99,17 @@ input.pq{width:58px;background:var(--bg3);border:1px solid var(--border);border-
 /* ERROR BANNER */
 .err-banner{background:#450a0a;border:1px solid #7f1d1d;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:#f87171;line-height:1.6;}
 
+/* SOURCE FILTER BAR */
+.filter-bar{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.filter-btn{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 16px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s;}
+.filter-btn:hover{border-color:var(--accent);color:var(--text);}
+.filter-btn.active{color:#fff;border-color:transparent;}
+.filter-btn.all.active{background:var(--accent);}
+.filter-btn.tab.active{background:#1e3a5f;color:var(--blue);border-color:var(--blue);}
+.filter-btn.cap.active{background:#14532d;color:var(--green);border-color:var(--green);}
+.filter-btn.onc.active{background:#422006;color:var(--amber);border-color:var(--amber);}
+.filter-count{font-size:10px;background:rgba(255,255,255,.1);padding:1px 6px;border-radius:10px;margin-left:4px;}
+
 /* MODAL */
 .mbk{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:999;align-items:center;justify-content:center;}
 .mbk.on{display:flex;}
@@ -229,6 +240,7 @@ var SK = 'pm_inv_v5_en';
 var API='', USER='', ROLE='';
 var planning=[], pmData={}, orders=[], staffList=[];
 var curTab='ov', mId=null, mMiss=[];
+var activeSource = 'All'; // 'All', 'Tablet', 'Capsule', 'Oncology'
 
 // ---- STARTUP ----
 window.onload = function() {
@@ -397,21 +409,57 @@ function renderTab() {
   else if (curTab==='log') renderLog();
 }
 
+// ---- SHARED: sort newest first + apply source filter ----
+function sortedFiltered(rows) {
+  // Sort by timestamp descending (newest first)
+  var sorted = rows.slice().sort(function(a, b) {
+    return new Date(b.timestamp) - new Date(a.timestamp);
+  });
+  // Apply source filter
+  if (activeSource !== 'All') {
+    sorted = sorted.filter(function(r){ return r.source === activeSource; });
+  }
+  return sorted;
+}
+
+// ---- FILTER BAR HTML ----
+function filterBar() {
+  var all = enrich();
+  var counts = { All: all.length, Tablet: 0, Capsule: 0, Oncology: 0 };
+  all.forEach(function(r){ if(counts[r.source]!==undefined) counts[r.source]++; });
+  var btns = ['All','Tablet','Capsule','Oncology'].map(function(s){
+    var cls = s==='All'?'all':s==='Tablet'?'tab':s==='Capsule'?'cap':'onc';
+    var active = activeSource===s?' active':'';
+    return '<button class="filter-btn '+cls+active+'" onclick="setFilter(\''+s+'\')">'+
+      s+'<span class="filter-count">'+counts[s]+'</span></button>';
+  }).join('');
+  return '<div class="filter-bar">'+btns+'</div>';
+}
+
+function setFilter(src) {
+  activeSource = src;
+  renderTab();
+}
+
 // ---- OVERVIEW ----
 function renderOv() {
-  var rows  = enrich();
-  var total = rows.length;
-  var ready = rows.filter(function(r){ return r.overall==='READY FOR PACKING'; }).length;
-  var pend  = rows.filter(function(r){ return r.overall==='PENDING'; }).length;
-  var inc   = rows.filter(function(r){ return r.overall==='INCOMPLETE'; }).length;
+  var all   = enrich();
+  var total = all.length;
+  var ready = all.filter(function(r){ return r.overall==='READY FOR PACKING'; }).length;
+  var pend  = all.filter(function(r){ return r.overall==='PENDING'; }).length;
+  var inc   = all.filter(function(r){ return r.overall==='INCOMPLETE'; }).length;
+
+  var rows = sortedFiltered(all);
 
   var h = '<div class="stats">' +
-    sc('b','&#128200;', total, 'Total Batches',     '') +
-    sc('g','&#10003;',  ready, 'Ready for Packing', 'color:var(--green)') +
+    sc('b','&#128200;', total, 'Total Batches',      '') +
+    sc('g','&#10003;',  ready, 'Ready for Packing',  'color:var(--green)') +
     sc('r','&#9888;',   pend,  'PM Materials Missing','color:var(--red)') +
-    sc('a','&#9711;',   inc,   'Not Updated Yet',   'color:var(--amber)') +
+    sc('a','&#9711;',   inc,   'Not Updated Yet',    'color:var(--amber)') +
     '</div>' +
-    '<div class="tbox"><div class="th2"><div class="tt">All Batches — Overview</div>' +
+    filterBar() +
+    '<div class="tbox"><div class="th2">' +
+    '<div class="tt">All Batches — Overview <span style="color:var(--muted);font-weight:400;font-size:12px">('+rows.length+' shown, newest first)</span></div>' +
     '<input class="ts2" placeholder="Search batches..." oninput="filt(this,\'t-ov\')"></div>' +
     '<div class="tsc"><table id="t-ov"><thead><tr>' +
     '<th>Source</th><th>Batch No</th><th>Timestamp</th><th>Batch Name</th>' +
@@ -429,7 +477,7 @@ function renderOv() {
       '<td style="font-size:12px;color:var(--muted)">'+esc(r.updBy||'—')+(r.updAt?'<br><span style="font-size:10px">'+esc(r.updAt)+'</span>':'')+'</td>' +
       '</tr>'; }).join('') +
     '</tbody></table>' +
-    (rows.length===0?'<div class="empty"><p>No data found.<br>Please set your Spreadsheet IDs in <b>WebApp_English.gs</b></p></div>':'') +
+    (rows.length===0?'<div class="empty"><p>No data found for this filter.<br>Try selecting "All" or check your Spreadsheet IDs in <b>WebApp_English.gs</b></p></div>':'') +
     '</div></div>';
   document.getElementById('mc').innerHTML = h;
 }
@@ -441,8 +489,10 @@ function sc(ic,sym,val,lbl,vs){
 
 // ---- PM DASHBOARD ----
 function renderPM() {
-  var rows = enrich();
-  var h = '<div class="tbox"><div class="th2"><div class="tt">PM Availability — Update Status</div>' +
+  var rows = sortedFiltered(enrich());
+  var h = filterBar() +
+    '<div class="tbox"><div class="th2">' +
+    '<div class="tt">PM Availability — Update Status <span style="color:var(--muted);font-weight:400;font-size:12px">('+rows.length+' shown, newest first)</span></div>' +
     '<input class="ts2" placeholder="Search..." oninput="filt(this,\'t-pm2\')"></div>' +
     '<div class="tsc"><table id="t-pm2"><thead><tr>' +
     '<th>Source</th><th>Batch No</th><th>Batch Name</th><th>Pack Size</th>' +
@@ -480,7 +530,7 @@ function renderPM() {
   });
 
   h += '</tbody></table>' +
-    (rows.length===0?'<div class="empty"><p>No planning data found.</p></div>':'') +
+    (rows.length===0?'<div class="empty"><p>No planning data found for this filter.</p></div>':'') +
     '</div></div>';
   document.getElementById('mc').innerHTML = h;
 }
@@ -530,8 +580,10 @@ function saveR(id, source, batchNo, batchName, ts){
 
 // ---- PENDING ORDERS ----
 function renderPnd(){
-  var rows = enrich().filter(function(r){ return r.overall==='PENDING'; });
-  var h = '<div class="tbox"><div class="th2"><div class="tt">Pending Orders — PM Materials Not Available</div>' +
+  var rows = sortedFiltered(enrich().filter(function(r){ return r.overall==='PENDING'; }));
+  var h = filterBar() +
+    '<div class="tbox"><div class="th2">' +
+    '<div class="tt">Pending Orders — PM Materials Not Available</div>' +
     '<input class="ts2" placeholder="Search..." oninput="filt(this,\'t-pnd2\')"></div>' +
     '<div class="tsc"><table id="t-pnd2"><thead><tr>' +
     '<th>Source</th><th>Batch No</th><th>Batch Name</th><th>Pack Size</th>' +
@@ -549,15 +601,17 @@ function renderPnd(){
         '</tr>';
     }).join('') +
     '</tbody></table>' +
-    (rows.length===0?'<div class="empty"><div class="ei">&#10003;</div><p>No pending items — all PM materials are available!</p></div>':'') +
+    (rows.length===0?'<div class="empty"><div class="ei">&#10003;</div><p>No pending items for this filter.</p></div>':'') +
     '</div></div>';
   document.getElementById('mc').innerHTML = h;
 }
 
 // ---- READY TO PACK ----
 function renderPk(){
-  var rows = enrich().filter(function(r){ return r.overall==='READY FOR PACKING'; });
-  var h = '<div class="tbox"><div class="th2"><div class="tt">Ready for Packing — All PM Materials Available</div>' +
+  var rows = sortedFiltered(enrich().filter(function(r){ return r.overall==='READY FOR PACKING'; }));
+  var h = filterBar() +
+    '<div class="tbox"><div class="th2">' +
+    '<div class="tt">Ready for Packing — All PM Materials Available</div>' +
     '<input class="ts2" placeholder="Search..." oninput="filt(this,\'t-pk2\')"></div>' +
     '<div class="tsc"><table id="t-pk2"><thead><tr>' +
     '<th>Source</th><th>Batch No</th><th>Batch Name</th><th>Colour</th>' +
@@ -576,7 +630,7 @@ function renderPk(){
       '<td style="font-size:12px;color:var(--muted)">'+esc(r.updBy||'—')+'</td>' +
       '</tr>'; }).join('') +
     '</tbody></table>' +
-    (rows.length===0?'<div class="empty"><div class="ei">&#9711;</div><p>No batches ready yet.<br>PM team needs to mark all materials as Available.</p></div>':'') +
+    (rows.length===0?'<div class="empty"><div class="ei">&#9711;</div><p>No batches ready for this filter.<br>PM team needs to mark all materials as Available.</p></div>':'') +
     '</div></div>';
   document.getElementById('mc').innerHTML = h;
 }
