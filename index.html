@@ -159,7 +159,7 @@ input.pq{width:58px;background:var(--bg3);border:1px solid var(--border);border-
   <div id="err-msg"></div>
   <div id="ok-msg"></div>
 
-  <div id="url-section">
+  <div id="url-section" style="display:none;">
     <label class="lbl">Web App URL <span>*</span> <span style="font-weight:400;color:var(--muted)">(Admin only — one time setup)</span></label>
     <div class="url-row">
       <input class="fi" type="password" id="inp-url" placeholder="Paste Web App URL here..." autocomplete="off">
@@ -228,26 +228,35 @@ input.pq{width:58px;background:var(--bg3);border:1px solid var(--border);border-
 <div id="toast"></div>
 
 <script>
+// ═══════════════════════════════════
+// FIXED WEB APP URL — yahi URL hamesha use hogi
+// ═══════════════════════════════════
+var FIXED_API_URL = 'https://script.google.com/macros/s/AKfycbyEmPfavlX7sRos20ddm8525irwcZ2j4EmRlB2Ap1MghjmSzDHIAzwimfuELBoSiyq8oA/exec';
+
 var PM_ITEMS = ['Carton','Base Foil','Foil','Shipper','Leaflet','Jar'];
 var SK = 'pm_inv_v5_en';
-var API='', USER='', ROLE='';
+var API=FIXED_API_URL, USER='', ROLE='';
 var planning=[], pmData={}, orders=[], staffList=[];
 var curTab='ov', mId=null, mMiss=[];
 var activeSource = 'All'; // 'All', 'Tablet', 'Capsule', 'Oncology'
 
 // ---- STARTUP ----
 window.onload = function() {
+  // API hamesha fixed URL use karega
+  API = FIXED_API_URL;
+  
   var s = load();
-  if (s && s.url) {
-    // URL already saved — hide URL section, auto-load staff names
-    document.getElementById('url-section').style.display = 'none';
-    document.getElementById('inp-url').value = s.url;
-    if (s.role) document.getElementById('inp-role').value = s.role;
-    fetchStaff(s.url, s.name);
-    // Update subtitle
-    document.querySelector('.sbox .sub').textContent = 'Select your name and role to continue.';
+  if (s && s.role) {
+    document.getElementById('inp-role').value = s.role;
   }
-  // If no URL saved yet, URL section stays visible for first-time admin setup
+  // URL section hamesha hidden rahega — kisi ko URL dalne ki zaroorat nahi
+  document.getElementById('url-section').style.display = 'none';
+  
+  // Staff names fetch karo fixed URL se
+  fetchStaff(FIXED_API_URL, s?s.name:'');
+  
+  // Update subtitle
+  document.querySelector('.sbox .sub').textContent = 'Select your name and role to continue.';
 };
 
 function load(){ try{ return JSON.parse(localStorage.getItem(SK)||'null'); }catch(e){ return null; } }
@@ -263,10 +272,9 @@ function api(action, body) {
   });
 }
 
-// ---- TEST CONNECTION ----
+// ---- TEST CONNECTION (hidden feature, sirf URL section show karke use kar sakte hain) ----
 function testConn() {
-  var url = document.getElementById('inp-url').value.trim();
-  if (!url) { showErr('Please enter the Web App URL'); return; }
+  var url = FIXED_API_URL; // Fixed URL hi test hogi
   var btn = document.querySelector('.btn-test');
   btn.textContent = 'Testing...'; btn.disabled = true;
 
@@ -313,20 +321,16 @@ function showOk(m){ var e=document.getElementById('ok-msg'); e.textContent=m; e.
 
 // ---- OPEN DASHBOARD ----
 function goDash() {
-  var url  = document.getElementById('inp-url').value.trim();
   var name = document.getElementById('inp-name').value.trim();
   var role = document.getElementById('inp-role').value;
 
-  if (!url) {
-    // URL section might be hidden — show it so admin can enter URL
-    document.getElementById('url-section').style.display = 'block';
-    showErr('Web App URL is required. Please enter it above.');
-    return;
-  }
+  // API hamesha fixed URL use karega — kisi input ki zaroorat nahi
+  API = FIXED_API_URL;
+
   if (!name) { showErr('Please select your name'); return; }
 
-  API = url; USER = name; ROLE = role;
-  save({ url:url, name:name, role:role });
+  USER = name; ROLE = role;
+  save({ name:name, role:role });
 
   document.getElementById('setup').style.display = 'none';
   document.getElementById('app').style.display   = 'block';
@@ -346,15 +350,17 @@ function goDash() {
 }
 
 function switchU() {
-  // Show setup screen but keep URL hidden — users only change name/role
-  var s = load();
+  // Setup screen dikhao, sirf naam aur role change karne ke liye
+  // URL section hamesha hidden rahega
   document.getElementById('app').style.display   = 'none';
   document.getElementById('setup').style.display = 'flex';
   document.getElementById('url-section').style.display = 'none';
-  if (s && s.url) {
-    document.getElementById('inp-url').value = s.url;
-    fetchStaff(s.url, s.name);
+  
+  var s = load();
+  if (s && s.role) {
+    document.getElementById('inp-role').value = s.role;
   }
+  fetchStaff(FIXED_API_URL, s?s.name:'');
 }
 
 // ---- REFRESH ALL DATA ----
