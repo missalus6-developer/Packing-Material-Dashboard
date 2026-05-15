@@ -3,272 +3,152 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>PM Inventory | Not Required</title>
+  <title>PM Inventory | Multi-Item Order + Excel Download</title>
   <style>
     :root {
-      --bg: #0f1117;
-      --bg2: #1a1d27;
-      --bg3: #22263a;
-      --card: #1e2235;
-      --border: #2e334d;
-      --text: #e8eaf6;
-      --muted: #8b91b5;
-      --accent: #4f78ff;
-      --green: #22c55e;
-      --red: #ef4444;
-      --amber: #f59e0b;
-      --blue: #38bdf8;
-      --purple: #a78bfa;
+      --bg: #0f1117; --bg2: #1a1d27; --bg3: #22263a; --card: #1e2235;
+      --border: #2e334d; --text: #e8eaf6; --muted: #8b91b5; --accent: #4f78ff;
+      --green: #22c55e; --red: #ef4444; --amber: #f59e0b; --blue: #38bdf8; --purple: #a78bfa;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      font-size: 14px;
-      min-height: 100vh;
+      background: var(--bg); color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; min-height: 100vh;
     }
-    #setup {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+    #setup { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
     .sbox {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 36px;
-      width: 540px;
-      max-width: 96vw;
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 36px; width: 540px; max-width: 96vw;
     }
     .sbox h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
     .sub { color: var(--muted); font-size: 12px; margin-bottom: 24px; line-height: 1.7; }
     .lbl { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 5px; display: block; }
     .lbl span { color: var(--red); }
     input.fi, select.fi {
-      width: 100%;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 14px;
-      color: var(--text);
-      font-size: 13px;
-      margin-bottom: 16px;
-      outline: none;
+      width: 100%; background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 14px; color: var(--text); font-size: 13px;
+      margin-bottom: 16px; outline: none;
     }
     input.fi:focus, select.fi:focus { border-color: var(--accent); }
     .btn-go {
-      width: 100%;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-bottom: 12px;
+      width: 100%; background: var(--accent); color: #fff; border: none;
+      border-radius: 8px; padding: 12px; font-size: 14px; font-weight: 600;
+      cursor: pointer; margin-bottom: 12px;
     }
     .btn-go:hover { opacity: 0.9; }
     #err-msg { color: var(--red); font-size: 12px; margin-bottom: 12px; display: none; padding: 8px 12px; background: #450a0a; border-radius: 6px; }
-    #ok-msg { color: var(--green); font-size: 12px; margin-bottom: 12px; display: none; padding: 8px 12px; background: #14532d; border-radius: 6px; }
     #app { display: none; }
     .topbar {
-      background: var(--bg2);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      height: 52px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      background: var(--bg2); border-bottom: 1px solid var(--border); display: flex;
+      align-items: center; justify-content: space-between; padding: 0 20px; height: 52px;
+      position: sticky; top: 0; z-index: 100;
     }
     .brand { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px; }
     .brand em { color: var(--accent); font-style: normal; }
     .tr { display: flex; align-items: center; gap: 10px; }
     .uchip {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 4px 12px;
-      font-size: 12px;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      background: var(--bg3); border: 1px solid var(--border); border-radius: 20px;
+      padding: 4px 12px; font-size: 12px; color: var(--muted); display: flex;
+      align-items: center; gap: 6px;
     }
     .rbadge { font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 600; }
     .rbadge.pm { background: #1e3a5f; color: var(--blue); }
     .rbadge.su { background: #14532d; color: var(--green); }
     .rbadge.ad { background: #3b1f6a; color: var(--purple); }
     .bsm {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      border-radius: 7px;
-      padding: 5px 11px;
-      cursor: pointer;
-      font-size: 12px;
+      background: var(--bg3); border: 1px solid var(--border); color: var(--muted);
+      border-radius: 7px; padding: 5px 11px; cursor: pointer; font-size: 12px;
     }
     .bsm:hover { border-color: var(--accent); color: var(--text); }
     .nav {
-      background: var(--bg2);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      padding: 0 20px;
-      gap: 2px;
-      overflow-x: auto;
+      background: var(--bg2); border-bottom: 1px solid var(--border); display: flex;
+      padding: 0 20px; gap: 2px; overflow-x: auto;
     }
     .tab {
-      padding: 11px 16px;
-      cursor: pointer;
-      font-size: 13px;
-      color: var(--muted);
-      border-bottom: 2px solid transparent;
-      white-space: nowrap;
+      padding: 11px 16px; cursor: pointer; font-size: 13px; color: var(--muted);
+      border-bottom: 2px solid transparent; white-space: nowrap;
     }
     .tab:hover { color: var(--text); }
     .tab.on { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
     .tab.hide { display: none; }
-    .pg { padding: 20px; max-width: 1500px; margin: 0 auto; }
+    .pg { padding: 20px; max-width: 1600px; margin: 0 auto; }
     .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
     .sc {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 11px;
-      padding: 18px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 11px;
+      padding: 18px; display: flex; align-items: center; gap: 14px;
     }
     .sico {
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      flex-shrink: 0;
+      width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center;
+      justify-content: center; font-size: 20px; flex-shrink: 0;
     }
-    .sico.b { background: #1e3a5f; } .sico.g { background: #14532d; } .sico.r { background: #450a0a; } .sico.a { background: #422006; } .sico.p { background: #3b1f6a; }
+    .sico.b { background: #1e3a5f; } .sico.g { background: #14532d; }
+    .sico.r { background: #450a0a; } .sico.a { background: #422006; }
     .sv { font-size: 28px; font-weight: 700; line-height: 1; }
     .sl { font-size: 11px; color: var(--muted); margin-top: 4px; }
     .tbox { background: var(--card); border: 1px solid var(--border); border-radius: 11px; overflow: hidden; }
     .th2 {
-      padding: 14px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--border);
-      flex-wrap: wrap;
-      gap: 8px;
+      padding: 14px 18px; display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 8px;
     }
     .tt { font-size: 14px; font-weight: 600; }
     .ts2 {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      padding: 6px 12px;
-      color: var(--text);
-      font-size: 12px;
-      width: 210px;
-      outline: none;
+      background: var(--bg3); border: 1px solid var(--border); border-radius: 7px;
+      padding: 6px 12px; color: var(--text); font-size: 12px; width: 210px; outline: none;
     }
     .ts2:focus { border-color: var(--accent); }
     .tsc { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; }
+    table { width: 100%; border-collapse: collapse; min-width: 1000px; }
     th {
-      background: var(--bg3);
-      text-align: left;
-      padding: 10px 12px;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .5px;
-      border-bottom: 1px solid var(--border);
-      white-space: nowrap;
+      background: var(--bg3); text-align: left; padding: 10px 12px; font-size: 11px;
+      font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px;
+      border-bottom: 1px solid var(--border); white-space: nowrap;
     }
     td { padding: 11px 12px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: rgba(79,120,255,.04); }
     .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 3px 9px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
-      white-space: nowrap;
+      display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px;
+      border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap;
     }
     .pg2 { color: #4ade80; background: #14532d; }
     .pr2 { color: #f87171; background: #450a0a; }
     .pa2 { color: #fbbf24; background: #422006; }
     .pb2 { color: #60a5fa; background: #1e3a5f; }
     .pz2 { color: var(--muted); background: var(--bg3); border: 1px solid var(--border); }
-    .pnr { color: #c084fc; background: #3b1f6a; } /* Not Required pill */
     .dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
-    .dg { background: #4ade80; } .dr { background: #f87171; } .da { background: #fbbf24; } .dp { background: #c084fc; }
+    .dg { background: #4ade80; } .dr { background: #f87171; }
     select.ps {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 5px;
-      padding: 3px 6px;
-      color: var(--text);
-      font-size: 11px;
-      cursor: pointer;
-      outline: none;
-      width: 100%;
-      min-width: 130px;
+      background: var(--bg3); border: 1px solid var(--border); border-radius: 5px;
+      padding: 3px 6px; color: var(--text); font-size: 11px; cursor: pointer;
+      outline: none; width: 100%; min-width: 130px;
     }
     select.ps.av { border-color: var(--green); color: var(--green); }
     select.ps.na { border-color: var(--red); color: var(--red); }
     select.ps.nr { border-color: #c084fc; color: #c084fc; }
     input.pq {
-      width: 58px;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 5px;
-      padding: 3px 6px;
-      color: var(--text);
-      font-size: 11px;
-      text-align: center;
-      outline: none;
+      width: 58px; background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 5px; padding: 3px 6px; color: var(--text); font-size: 11px;
+      text-align: center; outline: none;
     }
     .pm-cell { display: flex; flex-direction: column; gap: 4px; min-width: 130px; }
     .pm-lbl { font-size: 9px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
     .bsave {
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 6px 14px;
-      font-size: 11px;
-      cursor: pointer;
-      font-weight: 600;
-      white-space: nowrap;
+      background: var(--accent); color: #fff; border: none; border-radius: 6px;
+      padding: 6px 14px; font-size: 11px; cursor: pointer; font-weight: 600; white-space: nowrap;
     }
     .bsave:hover { opacity: .85; }
     .bsave:disabled { opacity: .4; cursor: default; }
-    .border-btn { background: #450a0a; color: #f87171; border: 1px solid #7f1d1d; border-radius: 6px; padding: 5px 11px; font-size: 11px; cursor: pointer; font-weight: 600; }
+    .border-btn {
+      background: #450a0a; color: #f87171; border: 1px solid #7f1d1d; border-radius: 6px;
+      padding: 5px 11px; font-size: 11px; cursor: pointer; font-weight: 600;
+    }
     .border-btn:hover { background: #7f1d1d; color: #fff; }
     .err-banner { background: #450a0a; border: 1px solid #7f1d1d; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 12px; color: #f87171; line-height: 1.6; }
     .filter-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
     .filter-btn {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 7px 16px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--muted);
-      cursor: pointer;
-      transition: all .15s;
+      background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+      padding: 7px 16px; font-size: 12px; font-weight: 600; color: var(--muted);
+      cursor: pointer; transition: all .15s;
     }
     .filter-btn:hover { border-color: var(--accent); color: var(--text); }
     .filter-btn.active { color: #fff; border-color: transparent; }
@@ -277,20 +157,47 @@
     .filter-btn.cap.active { background: #14532d; color: var(--green); border-color: var(--green); }
     .filter-btn.onc.active { background: #422006; color: var(--amber); border-color: var(--amber); }
     .filter-count { font-size: 10px; background: rgba(255,255,255,.1); padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
+    
     .mbk { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 999; align-items: center; justify-content: center; }
     .mbk.on { display: flex; }
-    .mbox { background: var(--card); border: 1px solid var(--border); border-radius: 14px; width: 460px; max-width: 96vw; padding: 28px; }
+    .mbox {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      width: 600px; max-width: 96vw; max-height: 85vh; overflow-y: auto; padding: 28px;
+    }
     .mbox h2 { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
     .msub { color: var(--muted); font-size: 12px; margin-bottom: 20px; }
+    .order-item-row {
+      display: flex; align-items: center; gap: 12px; padding: 12px;
+      background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .order-item-name {
+      flex: 1; font-weight: 600; font-size: 13px; color: var(--text);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .order-item-name .dot { width: 6px; height: 6px; }
+    .order-item-qty {
+      width: 80px; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 6px; padding: 8px 10px; color: var(--text); font-size: 13px;
+      text-align: center; outline: none;
+    }
+    .order-item-qty:focus { border-color: var(--accent); }
+    .order-item-qty::placeholder { color: var(--muted); font-size: 11px; }
     .mbox label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
-    .mbox input, .mbox textarea { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 7px; padding: 9px 12px; color: var(--text); font-size: 13px; margin-bottom: 14px; outline: none; font-family: inherit; }
-    .mbox input:focus, .mbox textarea:focus { border-color: var(--accent); }
+    .mbox textarea { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 7px; padding: 9px 12px; color: var(--text); font-size: 13px; margin-bottom: 14px; outline: none; font-family: inherit; resize: vertical; }
+    .mbox textarea:focus { border-color: var(--accent); }
     .macts { display: flex; gap: 8px; margin-top: 4px; }
     .bcancel { flex: 1; background: var(--bg3); border: 1px solid var(--border); color: var(--muted); border-radius: 7px; padding: 10px; cursor: pointer; font-size: 13px; }
     .bok { flex: 1; background: var(--accent); border: none; color: #fff; border-radius: 7px; padding: 10px; cursor: pointer; font-size: 13px; font-weight: 600; }
     .bok:hover { opacity: .9; }
-    .mtags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 14px; }
-    .mtag { background: #450a0a; color: #f87171; border-radius: 5px; padding: 3px 9px; font-size: 11px; }
+    .bok:disabled { opacity: .4; cursor: default; }
+    .download-link {
+      display: inline-block; background: var(--green); color: #fff; border-radius: 7px;
+      padding: 10px 16px; font-size: 13px; font-weight: 600; text-decoration: none;
+      cursor: pointer; margin-top: 12px; text-align: center;
+    }
+    .download-link:hover { opacity: .9; }
+    
     #toast { position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: var(--card); border: 1px solid var(--border); border-radius: 9px; padding: 11px 16px; font-size: 13px; transform: translateY(70px); opacity: 0; transition: all .25s; pointer-events: none; }
     #toast.on { transform: translateY(0); opacity: 1; }
     #toast.ok { border-color: var(--green); color: var(--green); }
@@ -300,20 +207,23 @@
     @keyframes sp { to { transform: rotate(360deg); } }
     .empty { text-align: center; padding: 60px; color: var(--muted); }
     .empty .ei { font-size: 40px; margin-bottom: 12px; }
+    .download-section { text-align: center; padding: 12px; background: #14532d; border-radius: 8px; margin-top: 12px; }
     @media(max-width:768px) {
       .stats { grid-template-columns: 1fr 1fr; }
       .pg { padding: 12px; } td,th { padding: 7px 9px; font-size: 12px; }
       .nav { padding: 0 12px; } .topbar { padding: 0 12px; }
+      .order-item-row { flex-wrap: wrap; }
+      .order-item-qty { width: 100%; }
     }
   </style>
 </head>
 <body>
+
 <div id="setup">
   <div class="sbox">
     <h1>● PM Inventory System</h1>
     <p class="sub">Select your name and role to open the dashboard.</p>
     <div id="err-msg"></div>
-    <div id="ok-msg"></div>
     <label class="lbl">Your Name <span>*</span></label>
     <select class="fi" id="inp-name"><option value="">-- Select your name --</option></select>
     <label class="lbl">Your Role <span>*</span></label>
@@ -343,320 +253,592 @@
     <div class="tab" data-t="log" onclick="showTab('log')" id="t-log">Orders Log</div>
   </div>
   <div class="pg" id="mc">
-    <div class="loader"><div class="spin"></div><span>Loading data...</span></div>
+    <div class="loader"><div class="spin"></div><span>Loading data from Google Sheets...</span></div>
   </div>
 </div>
 
 <div class="mbk" id="modal">
   <div class="mbox">
-    <h2>Place Order</h2>
+    <h2>🛒 Place Order — Individual Items</h2>
     <div class="msub" id="m-prod"></div>
-    <label>Missing PM Items</label>
-    <div class="mtags" id="m-tags"></div>
-    <label>Order Quantity <span style="color:var(--red)">*</span></label>
-    <input type="number" id="m-qty" placeholder="Enter quantity..." min="1">
-    <label>Remarks (optional)</label>
-    <textarea id="m-rmk" rows="2" placeholder="Any notes..."></textarea>
+    <label style="margin-bottom:12px;">📦 Enter Quantity for Each Missing Item</label>
+    <div id="m-items-container"></div>
+    <label style="margin-top:8px;">📝 Remarks (optional)</label>
+    <textarea id="m-rmk" rows="2" placeholder="Any special instructions or notes..."></textarea>
     <div class="macts">
       <button class="bcancel" onclick="closeMod()">Cancel</button>
-      <button class="bok" onclick="doOrder()">Place Order</button>
+      <button class="bok" id="btn-place-order" onclick="doOrder()">✅ Place Orders & Download Excel</button>
     </div>
+    <div id="m-download-section"></div>
   </div>
 </div>
 <div id="toast"></div>
 
 <script>
-  var FIXED_API_URL = 'https://script.google.com/macros/s/AKfycbyEmPfavlX7sRos20ddm8525irwcZ2j4EmRlB2Ap1MghjmSzDHIAzwimfuELBoSiyq8oA/exec';
-  var PM_ITEMS = ['Carton','Base Foil','Foil','Shipper','Leaflet','Jar'];
-  var SK = 'pm_inv_v6_nr';
-  var API=FIXED_API_URL, USER='', ROLE='';
-  var planning=[], pmData={}, orders=[], staffList=[];
-  var curTab='ov', mId=null, mMiss=[];
-  var activeSource = 'All';
+// ═══════════════════════════════════════════════
+// YOUR WEB APP URL
+// ═══════════════════════════════════════════════
+var FIXED_API_URL = 'https://script.google.com/macros/s/AKfycbxzYBsbEN1lUj8-M-zZjrkiL99iZ5V6ossN_tps9ISYURiJV92FwiALUmBH3uNewknv/exec';
 
-  window.onload = function() {
-    API = FIXED_API_URL;
-    var s = load();
-    if (s && s.role) document.getElementById('inp-role').value = s.role;
-    fetchStaff(FIXED_API_URL, s?s.name:'');
-  };
+// ═══════════════════════════════════════════════
+// GLOBAL VARIABLES
+// ═══════════════════════════════════════════════
+var PM_ITEMS = ['Carton','Base Foil','Foil','Shipper','Leaflet','Jar'];
+var SK = 'pm_inv_v12';
 
-  function load(){ try{ return JSON.parse(localStorage.getItem(SK)||'null'); }catch(e){ return null; } }
-  function save(o){ try{ localStorage.setItem(SK,JSON.stringify(o)); }catch(e){} }
+var API = FIXED_API_URL;
+var USER = '';
+var ROLE = '';
+var planning = [];
+var pmData = {};
+var orders = [];
+var staffList = [];
+var curTab = 'ov';
+var mId = null;
+var mMiss = [];
+var mRowData = null;
+var activeSource = 'All';
 
-  function api(action, body) {
-    var url = API + '?action=' + encodeURIComponent(action);
-    if (body) url += '&body=' + encodeURIComponent(JSON.stringify(body));
-    return fetch(url).then(function(r){
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
-    });
+window.onload = function() {
+  API = FIXED_API_URL;
+  var savedData = loadFromStorage();
+  if (savedData && savedData.role) {
+    document.getElementById('inp-role').value = savedData.role;
   }
+  fetchStaffNames(FIXED_API_URL, savedData ? savedData.name : '');
+};
 
-  function fetchStaff(url, sel) {
-    fetch(url + '?action=getStaffNames')
-    .then(r=>r.json())
-    .then(d=>{
-      var s = document.getElementById('inp-name');
-      s.innerHTML = '<option value="">-- Select your name --</option>';
-      var names = (d.success && d.data && d.data.length) ? d.data : ['Manager','PM Store','Supervisor'];
-      names.forEach(n=>{ let o=document.createElement('option'); o.value=n; o.textContent=n; if(n===sel) o.selected=true; s.appendChild(o); });
-    }).catch(()=>{});
+function loadFromStorage() {
+  try { return JSON.parse(localStorage.getItem(SK) || 'null'); } 
+  catch(error) { return null; }
+}
+
+function saveToStorage(data) {
+  try { localStorage.setItem(SK, JSON.stringify(data)); } 
+  catch(error) {}
+}
+
+function callApi(action, body) {
+  var url = API + '?action=' + encodeURIComponent(action);
+  if (body) {
+    url += '&body=' + encodeURIComponent(JSON.stringify(body));
   }
+  return fetch(url).then(function(response) {
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    return response.json();
+  });
+}
 
-  function goDash() {
-    var name = document.getElementById('inp-name').value.trim();
-    var role = document.getElementById('inp-role').value;
-    API = FIXED_API_URL;
-    if (!name) { document.getElementById('err-msg').style.display='block'; document.getElementById('err-msg').textContent='Please select your name'; return; }
-    USER = name; ROLE = role;
-    save({ name:name, role:role });
-    document.getElementById('setup').style.display='none';
-    document.getElementById('app').style.display='block';
-    document.getElementById('dname').textContent=name;
-    var b=document.getElementById('dbadge');
-    if(role==='pm_store'){ b.textContent='PM Store'; b.className='rbadge pm'; }
-    else if(role==='packing_supervisor'){ b.textContent='Supervisor'; b.className='rbadge su'; }
-    else { b.textContent='Admin'; b.className='rbadge ad'; }
-    if(role==='packing_supervisor'){
-      document.getElementById('t-pm').classList.add('hide');
-      document.getElementById('t-pnd').classList.add('hide');
-      document.getElementById('t-log').classList.add('hide');
-    }
-    refreshAll();
-  }
-
-  function switchU() {
-    document.getElementById('app').style.display='none';
-    document.getElementById('setup').style.display='flex';
-    var s=load(); if(s&&s.role) document.getElementById('inp-role').value=s.role;
-    fetchStaff(FIXED_API_URL, s?s.name:'');
-  }
-
-  function refreshAll() {
-    document.getElementById('mc').innerHTML='<div class="loader"><div class="spin"></div><span>Loading data...</span></div>';
-    Promise.all([api('getAllPlanning'), api('getPMData'), api('getOrders'), api('getStaffNames')])
-    .then(res=>{
-      if(res[0].success) planning=(res[0].data||[]).filter(r=>!r._error);
-      if(res[1].success) pmData=res[1].data||{};
-      if(res[2].success) orders=res[2].data||[];
-      if(res[3].success) staffList=res[3].data||[];
-      renderTab();
-      if(res[0].errors&&res[0].errors.length){
-        let eb=document.createElement('div'); eb.className='err-banner';
-        eb.innerHTML='<b>⚠ Some sheets not connected:</b><br>'+res[0].errors.join('<br>');
-        document.getElementById('mc').insertBefore(eb, document.getElementById('mc').firstChild);
-      }
-      toast(planning.length+' batches loaded','ok');
-    }).catch(e=>{
-      document.getElementById('mc').innerHTML='<div class="empty"><div class="ei">⚠</div><p style="color:var(--red)">'+e.message+'</p></div>';
-      toast('Connection error','er');
-    });
-  }
-
-  function enrich() {
-    return planning.map(r=>{
-      var pm = pmData[r.id] || {};
-      var sts = PM_ITEMS.map(i=>pm[i+'_status']||'');
-      var filled = sts.filter(s=>s!=='').length;
-      var ov = 'INCOMPLETE';
-      if(filled === PM_ITEMS.length) {
-        let allAvailable = sts.every(s=>s==='Available');
-        let anyNotRequired = sts.some(s=>s==='Not Required');
-        if(allAvailable && !anyNotRequired) ov = 'READY FOR PACKING';
-        else if(anyNotRequired) {
-          let remaining = sts.filter(s=>s!=='Not Required');
-          ov = remaining.every(s=>s==='Available') ? 'READY FOR PACKING' : 'PENDING';
-        } else {
-          ov = 'PENDING';
-        }
-      }
-      return Object.assign({}, r, { pm:pm, overall:ov, updBy:pm.updated_by||'', updAt:pm.last_updated||'' });
-    });
-  }
-
-  function showTab(t) {
-    curTab=t;
-    document.querySelectorAll('.tab').forEach(e=>e.classList.remove('on'));
-    let el=document.querySelector('[data-t="'+t+'"]'); if(el) el.classList.add('on');
-    renderTab();
-  }
-
-  function renderTab() {
-    if(curTab==='ov') renderOv();
-    else if(curTab==='pm') renderPM();
-    else if(curTab==='pnd') renderPnd();
-    else if(curTab==='pk') renderPk();
-    else if(curTab==='log') renderLog();
-  }
-
-  function sortedFiltered(rows) {
-    let sorted = rows.slice().sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
-    if(activeSource!=='All') sorted = sorted.filter(r=>r.source===activeSource);
-    return sorted;
-  }
-
-  function filterBar() {
-    let all=enrich();
-    let counts={All:all.length,Tablet:0,Capsule:0,Oncology:0};
-    all.forEach(r=>{if(counts[r.source]!==undefined) counts[r.source]++;});
-    return '<div class="filter-bar">'+['All','Tablet','Capsule','Oncology'].map(s=>{
-      let cls=s==='All'?'all':s==='Tablet'?'tab':s==='Capsule'?'cap':'onc';
-      return `<button class="filter-btn ${cls} ${activeSource===s?'active':''}" onclick="setFilter('${s}')">${s}<span class="filter-count">${counts[s]}</span></button>`;
-    }).join('')+'</div>';
-  }
-
-  function setFilter(src){ activeSource=src; renderTab(); }
-
-  function renderOv(){
-    let all=enrich();
-    let total=all.length, ready=all.filter(r=>r.overall==='READY FOR PACKING').length;
-    let pend=all.filter(r=>r.overall==='PENDING').length, inc=all.filter(r=>r.overall==='INCOMPLETE').length;
-    let rows=sortedFiltered(all);
-    let h=`<div class="stats">
-      ${sc('b','📈',total,'Total Batches')} ${sc('g','✓',ready,'Ready for Packing','color:var(--green)')}
-      ${sc('r','⚠',pend,'PM Materials Missing','color:var(--red)')} ${sc('a','◯',inc,'Not Updated Yet','color:var(--amber)')}
-    </div>${filterBar()}
-    <div class="tbox"><div class="th2"><div class="tt">All Batches (${rows.length})</div><input class="ts2" placeholder="Search..." oninput="filt(this,'t-ov')"></div>
-    <div class="tsc"><table id="t-ov"><thead><tr><th>Source</th><th>Batch No</th><th>Timestamp</th><th>Batch Name</th><th>Child Batch</th><th>Pack Size</th><th>MRP</th><th>PM Status</th><th>Updated By</th></tr></thead><tbody>
-    ${rows.map(r=>`<tr><td>${sp(r.source)}</td><td style="font-family:monospace">${esc(r.batchNo)}</td><td style="font-size:12px;color:var(--muted)">${esc(r.timestamp)}</td><td style="font-weight:600">${esc(r.batchName)}</td><td>${esc(r.childBatches||'—')}</td><td>${esc(r.packSize||'—')}</td><td>${esc(r.mrp||'—')}</td><td>${stpill(r.overall)}</td><td style="font-size:12px;color:var(--muted)">${esc(r.updBy||'—')}</td></tr>`).join('')}
-    </tbody></table>${rows.length===0?'<div class="empty"><p>No data found.</p></div>':''}</div></div>`;
-    document.getElementById('mc').innerHTML=h;
-  }
-
-  function sc(ic,sym,val,lbl,vs=''){ return `<div class="sc"><div class="sico ${ic}">${sym}</div><div><div class="sv"${vs?' style="'+vs+'"':''}>${val}</div><div class="sl">${lbl}</div></div></div>`; }
-
-  function renderPM(){
-    let rows=sortedFiltered(enrich());
-    let h=filterBar()+`<div class="tbox"><div class="th2"><div class="tt">PM Availability (${rows.length})</div><input class="ts2" placeholder="Search..." oninput="filt(this,'t-pm2')"></div>
-    <div class="tsc"><table id="t-pm2"><thead><tr><th>Source</th><th>Batch No</th><th>Batch Name</th><th>Pack Size</th>${PM_ITEMS.map(i=>'<th>'+i+'</th>').join('')}<th>Overall</th><th>Save</th></tr></thead><tbody>`;
-    rows.forEach(r=>{
-      h+=`<tr><td>${sp(r.source)}</td><td style="font-family:monospace">${esc(r.batchNo)}</td><td style="font-weight:600">${esc(r.batchName)}</td><td>${esc(r.packSize||'—')}</td>`;
-      PM_ITEMS.forEach(item=>{
-        let st=r.pm[item+'_status']||'', qt=r.pm[item+'_qty']||'';
-        let sc2=st==='Available'?'av':st==='Not Available'?'na':st==='Not Required'?'nr':'';
-        h+=`<td><div class="pm-cell"><div class="pm-lbl">${item}</div>
-          <select class="ps ${sc2}" data-rid="${r.id}" data-itm="${item}" onchange="chgS(this)">
-            <option value="" ${st==''?'selected':''}>— Select —</option>
-            <option value="Available" ${st==='Available'?'selected':''}>✓ Available</option>
-            <option value="Not Available" ${st==='Not Available'?'selected':''}>✗ Not Available</option>
-            <option value="Not Required" ${st==='Not Required'?'selected':''}>⊘ Not Required</option>
-          </select>
-          <input class="pq" type="number" min="0" placeholder="Qty" data-rid="${r.id}" data-itm="${item}" value="${esc(qt)}" style="display:${st?'block':'none'}">
-        </div></td>`;
+function fetchStaffNames(url, selectedName) {
+  fetch(url + '?action=getStaffNames')
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+      var selectElement = document.getElementById('inp-name');
+      selectElement.innerHTML = '<option value="">-- Select your name --</option>';
+      var names = (data.success && data.data && data.data.length) ? data.data : ['Manager','PM Store','Supervisor'];
+      names.forEach(function(name) {
+        var option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        if (name === selectedName) option.selected = true;
+        selectElement.appendChild(option);
       });
-      h+=`<td>${stpill(r.overall)}</td><td><button class="bsave" id="sv-${r.id}" onclick="saveR('${r.id}','${ej(r.source)}','${ej(r.batchNo)}','${ej(r.batchName)}','${ej(r.timestamp)}')">Save</button></td></tr>`;
+    })
+    .catch(function() {});
+}
+
+function goDash() {
+  var name = document.getElementById('inp-name').value.trim();
+  var role = document.getElementById('inp-role').value;
+  
+  if (!name) {
+    showError('Please select your name');
+    return;
+  }
+  
+  USER = name;
+  ROLE = role;
+  saveToStorage({ name: name, role: role });
+  
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('dname').textContent = name;
+  
+  var badge = document.getElementById('dbadge');
+  if (role === 'pm_store') {
+    badge.textContent = 'PM Store';
+    badge.className = 'rbadge pm';
+  } else if (role === 'packing_supervisor') {
+    badge.textContent = 'Supervisor';
+    badge.className = 'rbadge su';
+  } else {
+    badge.textContent = 'Admin';
+    badge.className = 'rbadge ad';
+  }
+  
+  if (role === 'packing_supervisor') {
+    document.getElementById('t-pm').classList.add('hide');
+    document.getElementById('t-pnd').classList.add('hide');
+    document.getElementById('t-log').classList.add('hide');
+  }
+  
+  refreshAllData();
+}
+
+function switchU() {
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('setup').style.display = 'flex';
+  var savedData = loadFromStorage();
+  if (savedData && savedData.role) {
+    document.getElementById('inp-role').value = savedData.role;
+  }
+  fetchStaffNames(FIXED_API_URL, savedData ? savedData.name : '');
+}
+
+function showError(message) {
+  document.getElementById('err-msg').style.display = 'block';
+  document.getElementById('err-msg').textContent = message;
+}
+
+function refreshAllData() {
+  document.getElementById('mc').innerHTML = '<div class="loader"><div class="spin"></div><span>Loading data from Google Sheets...</span></div>';
+  
+  Promise.all([
+    callApi('getAllPlanning'),
+    callApi('getPMData'),
+    callApi('getOrders'),
+    callApi('getStaffNames')
+  ])
+  .then(function(results) {
+    if (results[0].success) planning = (results[0].data || []).filter(function(row) { return !row._error; });
+    if (results[1].success) pmData = results[1].data || {};
+    if (results[2].success) orders = results[2].data || [];
+    if (results[3].success) staffList = results[3].data || [];
+    
+    renderCurrentTab();
+    
+    if (results[0].errors && results[0].errors.length) {
+      var errorBanner = document.createElement('div');
+      errorBanner.className = 'err-banner';
+      errorBanner.innerHTML = '<b>⚠ Some sheets not connected:</b><br>' + results[0].errors.join('<br>');
+      document.getElementById('mc').insertBefore(errorBanner, document.getElementById('mc').firstChild);
+    }
+    
+    showToast(planning.length + ' batches loaded successfully', 'ok');
+  })
+  .catch(function(error) {
+    document.getElementById('mc').innerHTML = '<div class="empty"><div class="ei">⚠</div><p style="color:var(--red)">' + error.message + '</p></div>';
+    showToast('Connection error', 'er');
+  });
+}
+
+function enrichPlanningData() {
+  return planning.map(function(row) {
+    var pmInfo = pmData[row.id] || {};
+    var statuses = PM_ITEMS.map(function(item) { return pmInfo[item + '_status'] || ''; });
+    var filledCount = statuses.filter(function(s) { return s !== ''; }).length;
+    var overallStatus = 'INCOMPLETE';
+    
+    if (filledCount === PM_ITEMS.length) {
+      var allAvailable = statuses.every(function(s) { return s === 'Available'; });
+      var hasNotRequired = statuses.some(function(s) { return s === 'Not Required'; });
+      
+      if (allAvailable && !hasNotRequired) {
+        overallStatus = 'READY FOR PACKING';
+      } else if (hasNotRequired) {
+        var remainingItems = statuses.filter(function(s) { return s !== 'Not Required'; });
+        overallStatus = remainingItems.every(function(s) { return s === 'Available'; }) ? 'READY FOR PACKING' : 'PENDING';
+      } else {
+        overallStatus = 'PENDING';
+      }
+    }
+    
+    return Object.assign({}, row, {
+      pm: pmInfo,
+      overall: overallStatus,
+      updBy: pmInfo.updated_by || '',
+      updAt: pmInfo.last_updated || ''
     });
-    h+=`</tbody></table>${rows.length===0?'<div class="empty"><p>No planning data.</p></div>':''}</div></div>`;
-    document.getElementById('mc').innerHTML=h;
-  }
+  });
+}
 
-  function chgS(sel){
-    let v=sel.value;
-    sel.className='ps'+(v==='Available'?' av':v==='Not Available'?' na':v==='Not Required'?' nr':'');
-    let q=document.querySelector(`input.pq[data-rid="${sel.dataset.rid}"][data-itm="${sel.dataset.itm}"]`);
-    if(q) q.style.display=v?'block':'none';
-  }
+function showTab(tabName) {
+  curTab = tabName;
+  document.querySelectorAll('.tab').forEach(function(tab) { tab.classList.remove('on'); });
+  var activeTab = document.querySelector('[data-t="' + tabName + '"]');
+  if (activeTab) activeTab.classList.add('on');
+  renderCurrentTab();
+}
 
-  function saveR(id, source, batchNo, batchName, ts){
-    let btn=document.getElementById('sv-'+id); if(!btn) return;
-    btn.textContent='Saving...'; btn.disabled=true;
-    let pms={};
-    PM_ITEMS.forEach(item=>{
-      let s=document.querySelector(`select.ps[data-rid="${id}"][data-itm="${item}"]`);
-      let q=document.querySelector(`input.pq[data-rid="${id}"][data-itm="${item}"]`);
-      pms[item]={status:s?s.value:'', qty:q?q.value:''};
+function renderCurrentTab() {
+  if (curTab === 'ov') renderOverview();
+  else if (curTab === 'pm') renderPMDashboard();
+  else if (curTab === 'pnd') renderPendingOrders();
+  else if (curTab === 'pk') renderReadyToPack();
+  else if (curTab === 'log') renderOrdersLog();
+}
+
+function sortAndFilter(rows) {
+  var sorted = rows.slice().sort(function(a, b) {
+    return new Date(b.timestamp) - new Date(a.timestamp);
+  });
+  if (activeSource !== 'All') {
+    sorted = sorted.filter(function(row) { return row.source === activeSource; });
+  }
+  return sorted;
+}
+
+function renderFilterBar() {
+  var allData = enrichPlanningData();
+  var counts = { All: allData.length, Tablet: 0, Capsule: 0, Oncology: 0 };
+  allData.forEach(function(row) { if (counts[row.source] !== undefined) counts[row.source]++; });
+  
+  return '<div class="filter-bar">' + ['All', 'Tablet', 'Capsule', 'Oncology'].map(function(source) {
+    var cssClass = source === 'All' ? 'all' : source === 'Tablet' ? 'tab' : source === 'Capsule' ? 'cap' : 'onc';
+    var isActive = activeSource === source ? ' active' : '';
+    return '<button class="filter-btn ' + cssClass + isActive + '" onclick="setSourceFilter(\'' + source + '\')">' + source + '<span class="filter-count">' + counts[source] + '</span></button>';
+  }).join('') + '</div>';
+}
+
+function setSourceFilter(source) {
+  activeSource = source;
+  renderCurrentTab();
+}
+
+function renderOverview() {
+  var allData = enrichPlanningData();
+  var total = allData.length;
+  var readyCount = allData.filter(function(row) { return row.overall === 'READY FOR PACKING'; }).length;
+  var pendingCount = allData.filter(function(row) { return row.overall === 'PENDING'; }).length;
+  var incompleteCount = allData.filter(function(row) { return row.overall === 'INCOMPLETE'; }).length;
+  var displayRows = sortAndFilter(allData);
+  
+  var html = '<div class="stats">' +
+    createStatCard('b', '📈', total, 'Total Batches') +
+    createStatCard('g', '✓', readyCount, 'Ready for Packing', 'color:var(--green)') +
+    createStatCard('r', '⚠', pendingCount, 'PM Materials Missing', 'color:var(--red)') +
+    createStatCard('a', '◯', incompleteCount, 'Not Updated Yet', 'color:var(--amber)') +
+    '</div>' + renderFilterBar() +
+    '<div class="tbox"><div class="th2"><div class="tt">All Batches — Overview (' + displayRows.length + ')</div><input class="ts2" placeholder="Search batches..." oninput="filterTable(this,\'t-ov\')"></div>' +
+    '<div class="tsc"><table id="t-ov"><thead><tr>' +
+    '<th>Source</th><th>Batch No</th><th>Timestamp</th><th>Batch Name</th>' +
+    '<th>Child Batch</th><th>Child Batch Size</th><th>Pack Size</th><th>MRP</th>' +
+    '<th>PM Status</th><th>Updated By</th>' +
+    '</tr></thead><tbody>' +
+    displayRows.map(function(row) {
+      return '<tr>' +
+        '<td>' + renderSourcePill(row.source) + '</td>' +
+        '<td style="font-family:monospace;font-size:12px">' + escapeHtml(row.batchNo) + '</td>' +
+        '<td style="font-size:12px;color:var(--muted)">' + escapeHtml(row.timestamp) + '</td>' +
+        '<td style="font-weight:600">' + escapeHtml(row.batchName) + '</td>' +
+        '<td>' + escapeHtml(row.childBatches || '—') + '</td>' +
+        '<td>' + escapeHtml(row.childBatchSize || '—') + '</td>' +
+        '<td>' + escapeHtml(row.packSize || '—') + '</td>' +
+        '<td>' + escapeHtml(row.mrp || '—') + '</td>' +
+        '<td>' + renderStatusPill(row.overall) + '</td>' +
+        '<td style="font-size:12px;color:var(--muted)">' + escapeHtml(row.updBy || '—') + '</td>' +
+        '</tr>';
+    }).join('') +
+    '</tbody></table>' + (displayRows.length === 0 ? '<div class="empty"><p>No data found for this filter.</p></div>' : '') + '</div></div>';
+  
+  document.getElementById('mc').innerHTML = html;
+}
+
+function createStatCard(iconClass, symbol, value, label, valueStyle) {
+  return '<div class="sc"><div class="sico ' + iconClass + '">' + symbol + '</div><div><div class="sv"' + (valueStyle ? ' style="' + valueStyle + '"' : '') + '>' + value + '</div><div class="sl">' + label + '</div></div></div>';
+}
+
+function renderPMDashboard() {
+  var displayRows = sortAndFilter(enrichPlanningData());
+  var html = renderFilterBar() + '<div class="tbox"><div class="th2"><div class="tt">PM Availability (' + displayRows.length + ')</div><input class="ts2" placeholder="Search..." oninput="filterTable(this,\'t-pm2\')"></div>' +
+    '<div class="tsc"><table id="t-pm2"><thead><tr>' +
+    '<th>Source</th><th>Batch No</th><th>Batch Name</th><th>Child Batch Size</th><th>Pack Size</th>' +
+    PM_ITEMS.map(function(item) { return '<th>' + item + '</th>'; }).join('') +
+    '<th>Overall</th><th>Save</th>' +
+    '</tr></thead><tbody>';
+  
+  displayRows.forEach(function(row) {
+    html += '<tr><td>' + renderSourcePill(row.source) + '</td><td style="font-family:monospace;font-size:12px">' + escapeHtml(row.batchNo) + '</td><td style="font-weight:600">' + escapeHtml(row.batchName) + '</td>' +
+      '<td>' + escapeHtml(row.childBatchSize || '—') + '</td><td>' + escapeHtml(row.packSize || '—') + '</td>';
+    
+    PM_ITEMS.forEach(function(item) {
+      var status = row.pm[item + '_status'] || '';
+      var quantity = row.pm[item + '_qty'] || '';
+      var selectClass = status === 'Available' ? 'av' : status === 'Not Available' ? 'na' : status === 'Not Required' ? 'nr' : '';
+      html += '<td><div class="pm-cell"><div class="pm-lbl">' + item + '</div>' +
+        '<select class="ps ' + selectClass + '" data-rid="' + row.id + '" data-itm="' + item + '" onchange="handleStatusChange(this)">' +
+        '<option value="" ' + (status === '' ? 'selected' : '') + '>— Select —</option>' +
+        '<option value="Available" ' + (status === 'Available' ? 'selected' : '') + '>✓ Available</option>' +
+        '<option value="Not Available" ' + (status === 'Not Available' ? 'selected' : '') + '>✗ Not Available</option>' +
+        '<option value="Not Required" ' + (status === 'Not Required' ? 'selected' : '') + '>⊘ Not Required</option>' +
+        '</select>' +
+        '<input class="pq" type="number" min="0" placeholder="Qty" data-rid="' + row.id + '" data-itm="' + item + '" value="' + escapeHtml(quantity) + '" style="display:' + (status ? 'block' : 'none') + '">' +
+        '</div></td>';
     });
-    api('updatePMStatus',{id,source,batchNo,batchName,timestampPlanning:ts,pmStatuses:pms,updatedBy:USER})
-    .then(res=>{
-      if(res.success){
-        pmData[id]=pmData[id]||{};
-        PM_ITEMS.forEach(item=>{ pmData[id][item+'_status']=pms[item].status; pmData[id][item+'_qty']=pms[item].qty; });
-        pmData[id].overall_status=res.overall; pmData[id].updated_by=USER; pmData[id].last_updated=res.lastUpdated;
-        toast('Saved! Status: '+res.overall,'ok'); renderPM();
-      } else { toast('Save failed: '+(res.error||'unknown'),'er'); btn.textContent='Save'; btn.disabled=false; }
-    }).catch(e=>{ toast('Error: '+e.message,'er'); btn.textContent='Save'; btn.disabled=false; });
-  }
+    
+    html += '<td>' + renderStatusPill(row.overall) + '</td><td><button class="bsave" id="sv-' + row.id + '" onclick="savePMStatus(\'' + row.id + '\',\'' + escapeJs(row.source) + '\',\'' + escapeJs(row.batchNo) + '\',\'' + escapeJs(row.batchName) + '\',\'' + escapeJs(row.timestamp) + '\')">Save</button></td></tr>';
+  });
+  
+  html += '</tbody></table>' + (displayRows.length === 0 ? '<div class="empty"><p>No planning data found.</p></div>' : '') + '</div></div>';
+  document.getElementById('mc').innerHTML = html;
+}
 
-  function renderPnd(){
-    let rows=sortedFiltered(enrich().filter(r=>r.overall==='PENDING'));
-    let h=filterBar()+`<div class="tbox"><div class="th2"><div class="tt">Pending Orders</div><input class="ts2" placeholder="Search..." oninput="filt(this,'t-pnd2')"></div>
-    <div class="tsc"><table id="t-pnd2"><thead><tr><th>Source</th><th>Batch No</th><th>Batch Name</th><th>Pack Size</th><th>Missing Items</th><th>Updated By</th><th>Action</th></tr></thead><tbody>
-    ${rows.map(r=>{
-      let miss=PM_ITEMS.filter(i=>(r.pm[i+'_status']||'')==='Not Available');
-      return `<tr><td>${sp(r.source)}</td><td style="font-family:monospace">${esc(r.batchNo)}</td><td style="font-weight:600">${esc(r.batchName)}</td><td>${esc(r.packSize||'—')}</td>
-      <td>${miss.map(m=>`<span class="pill pr2" style="margin:2px">${m}</span>`).join('')}</td><td style="font-size:12px;color:var(--muted)">${esc(r.updBy||'—')}</td>
-      <td><button class="border-btn" onclick="openMod('${r.id}','${ej(r.source)}','${ej(r.batchNo)}','${ej(r.batchName)}','${miss.join(',')}')">Place Order</button></td></tr>`;
-    }).join('')}
-    </tbody></table>${rows.length===0?'<div class="empty"><div class="ei">✓</div><p>No pending items.</p></div>':''}</div></div>`;
-    document.getElementById('mc').innerHTML=h;
-  }
+function handleStatusChange(selectElement) {
+  var value = selectElement.value;
+  selectElement.className = 'ps' + (value === 'Available' ? ' av' : value === 'Not Available' ? ' na' : value === 'Not Required' ? ' nr' : '');
+  var quantityInput = document.querySelector('input.pq[data-rid="' + selectElement.dataset.rid + '"][data-itm="' + selectElement.dataset.itm + '"]');
+  if (quantityInput) quantityInput.style.display = value ? 'block' : 'none';
+}
 
-  function renderPk(){
-    let rows=sortedFiltered(enrich().filter(r=>r.overall==='READY FOR PACKING'));
-    let h=filterBar()+`<div class="tbox"><div class="th2"><div class="tt">Ready to Pack</div><input class="ts2" placeholder="Search..." oninput="filt(this,'t-pk2')"></div>
-    <div class="tsc"><table id="t-pk2"><thead><tr><th>Source</th><th>Batch No</th><th>Batch Name</th><th>Colour</th><th>Master Batch Size</th><th>Pack Size</th><th>Foil Size</th><th>MRP</th><th>PM Status</th><th>Cleared By</th></tr></thead><tbody>
-    ${rows.map(r=>`<tr><td>${sp(r.source)}</td><td style="font-family:monospace">${esc(r.batchNo)}</td><td style="font-weight:600">${esc(r.batchName)}</td><td>${esc(r.colour||'—')}</td><td>${esc(r.masterBatchSize||'—')}</td><td>${esc(r.packSize||'—')}</td><td>${esc(r.foilSize||'—')}</td><td>${esc(r.mrp||'—')}</td><td>${PM_ITEMS.map(i=>'<span class="pill pg2" style="margin:1px;font-size:9px">'+i+'</span>').join('')}</td><td style="font-size:12px;color:var(--muted)">${esc(r.updBy||'—')}</td></tr>`).join('')}
-    </tbody></table>${rows.length===0?'<div class="empty"><div class="ei">◯</div><p>No batches ready.</p></div>':''}</div></div>`;
-    document.getElementById('mc').innerHTML=h;
-  }
+function savePMStatus(id, source, batchNo, batchName, timestamp) {
+  var saveButton = document.getElementById('sv-' + id);
+  if (!saveButton) return;
+  saveButton.textContent = 'Saving...';
+  saveButton.disabled = true;
+  
+  var statusData = {};
+  PM_ITEMS.forEach(function(item) {
+    var selectEl = document.querySelector('select.ps[data-rid="' + id + '"][data-itm="' + item + '"]');
+    var qtyEl = document.querySelector('input.pq[data-rid="' + id + '"][data-itm="' + item + '"]');
+    statusData[item] = { status: selectEl ? selectEl.value : '', qty: qtyEl ? qtyEl.value : '' };
+  });
+  
+  callApi('updatePMStatus', {
+    id: id, source: source, batchNo: batchNo, batchName: batchName,
+    timestampPlanning: timestamp, pmStatuses: statusData, updatedBy: USER
+  })
+  .then(function(response) {
+    if (response.success) {
+      pmData[id] = pmData[id] || {};
+      PM_ITEMS.forEach(function(item) {
+        pmData[id][item + '_status'] = statusData[item].status;
+        pmData[id][item + '_qty'] = statusData[item].qty;
+      });
+      pmData[id].overall_status = response.overall;
+      pmData[id].updated_by = USER;
+      pmData[id].last_updated = response.lastUpdated;
+      showToast('Saved! Status: ' + response.overall, 'ok');
+      renderPMDashboard();
+    } else {
+      showToast('Save failed: ' + (response.error || 'Unknown error'), 'er');
+      saveButton.textContent = 'Save';
+      saveButton.disabled = false;
+    }
+  })
+  .catch(function(error) {
+    showToast('Error: ' + error.message, 'er');
+    saveButton.textContent = 'Save';
+    saveButton.disabled = false;
+  });
+}
 
-  function renderLog(){
-    let h=`<div class="tbox"><div class="th2"><div class="tt">Orders Log</div><input class="ts2" placeholder="Search..." oninput="filt(this,'t-log2')"></div>
-    <div class="tsc"><table id="t-log2"><thead><tr><th>Order ID</th><th>Batch No</th><th>Batch Name</th><th>Missing Items</th><th>Qty</th><th>Ordered By</th><th>Timestamp</th><th>Status</th></tr></thead><tbody>
-    ${orders.slice().reverse().map(o=>{
-      let miss=(o['Missing Items']||'').split(',').map(m=>`<span class="pill pr2" style="margin:1px;font-size:9px">${m.trim()}</span>`).join('');
-      let sc2=o['Order Status']==='Received'?'pg2':o['Order Status']==='Ordered'?'pb2':'pz2';
-      return `<tr><td style="font-family:monospace;font-size:10px;color:var(--muted)">${esc(o['Order ID']||'—')}</td><td style="font-size:12px">${esc(o['Batch No']||'—')}</td><td style="font-weight:600">${esc(o['Batch Name']||'—')}</td><td>${miss}</td><td>${esc(o['Order Qty']||'—')}</td><td>${esc(o['Ordered By']||'—')}</td><td style="font-size:11px;color:var(--muted)">${esc(o['Timestamp']||'—')}</td><td><span class="pill ${sc2}">${esc(o['Order Status']||'—')}</span></td></tr>`;
-    }).join('')}
-    </tbody></table>${orders.length===0?'<div class="empty"><p>No orders yet.</p></div>':''}</div></div>`;
-    document.getElementById('mc').innerHTML=h;
-  }
+function renderPendingOrders() {
+  var displayRows = sortAndFilter(enrichPlanningData().filter(function(row) { return row.overall === 'PENDING'; }));
+  var html = renderFilterBar() + '<div class="tbox"><div class="th2"><div class="tt">Pending Orders</div><input class="ts2" placeholder="Search..." oninput="filterTable(this,\'t-pnd2\')"></div>' +
+    '<div class="tsc"><table id="t-pnd2"><thead><tr>' +
+    '<th>Source</th><th>Batch No</th><th>Batch Name</th><th>Child Batch Size</th><th>Pack Size</th>' +
+    '<th>Missing Items</th><th>Updated By</th><th>Action</th>' +
+    '</tr></thead><tbody>' +
+    displayRows.map(function(row) {
+      var missingItems = PM_ITEMS.filter(function(item) { return (row.pm[item + '_status'] || '') === 'Not Available'; });
+      return '<tr><td>' + renderSourcePill(row.source) + '</td><td style="font-family:monospace;font-size:12px">' + escapeHtml(row.batchNo) + '</td><td style="font-weight:600">' + escapeHtml(row.batchName) + '</td>' +
+        '<td>' + escapeHtml(row.childBatchSize || '—') + '</td><td>' + escapeHtml(row.packSize || '—') + '</td>' +
+        '<td>' + missingItems.map(function(item) { return '<span class="pill pr2" style="margin:2px">' + item + '</span>'; }).join('') + '</td>' +
+        '<td style="font-size:12px;color:var(--muted)">' + escapeHtml(row.updBy || '—') + '</td>' +
+        '<td><button class="border-btn" onclick="openOrderModal(\'' + row.id + '\',\'' + escapeJs(row.source) + '\',\'' + escapeJs(row.batchNo) + '\',\'' + escapeJs(row.batchName) + '\',\'' + missingItems.join(',') + '\')">🛒 Order Items</button></td></tr>';
+    }).join('') +
+    '</tbody></table>' + (displayRows.length === 0 ? '<div class="empty"><div class="ei">✓</div><p>No pending items for this filter.</p></div>' : '') + '</div></div>';
+  document.getElementById('mc').innerHTML = html;
+}
 
-  function openMod(id, source, batchNo, batchName, missStr){
-    mId=id; mMiss=missStr.split(',').map(s=>s.trim()).filter(Boolean);
-    document.getElementById('m-prod').textContent=batchName+' ('+batchNo+') — '+source;
-    document.getElementById('m-tags').innerHTML=mMiss.map(m=>`<span class="mtag">${m}</span>`).join('');
-    document.getElementById('m-qty').value=''; document.getElementById('m-rmk').value='';
-    document.getElementById('modal').classList.add('on');
-  }
-  function closeMod(){ document.getElementById('modal').classList.remove('on'); mId=null; }
-  function doOrder(){
-    let qty=document.getElementById('m-qty').value.trim(), rmk=document.getElementById('m-rmk').value.trim();
-    if(!qty||parseInt(qty)<1){ toast('Enter valid quantity','er'); return; }
-    if(!mId) return;
-    let row=planning.find(r=>r.id===mId); if(!row) return;
-    api('placeOrder',{source:row.source,batchNo:row.batchNo,batchName:row.batchName,missingItems:mMiss.join(', '),orderQty:qty,orderedBy:USER,remarks:rmk})
-    .then(res=>{
-      if(res.success){
-        toast('Order placed! ID: '+res.orderId,'ok');
-        orders.push({'Order ID':res.orderId,'Source':row.source,'Batch No':row.batchNo,'Batch Name':row.batchName,'Missing Items':mMiss.join(', '),'Order Qty':qty,'Ordered By':USER,'Timestamp':res.timestamp,'Order Status':'Ordered','Remarks':rmk});
-        closeMod();
-      } else toast('Order failed','er');
-    }).catch(e=>toast('Error: '+e.message,'er'));
-  }
-  document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeMod();});
+function renderReadyToPack() {
+  var displayRows = sortAndFilter(enrichPlanningData().filter(function(row) { return row.overall === 'READY FOR PACKING'; }));
+  var html = renderFilterBar() + '<div class="tbox"><div class="th2"><div class="tt">Ready to Pack</div><input class="ts2" placeholder="Search..." oninput="filterTable(this,\'t-pk2\')"></div>' +
+    '<div class="tsc"><table id="t-pk2"><thead><tr>' +
+    '<th>Source</th><th>Batch No</th><th>Batch Name</th><th>Colour</th>' +
+    '<th>Master Batch Size</th><th>Child Batch Size</th><th>Pack Size</th>' +
+    '<th>Foil Size</th><th>MRP</th><th>PM Status</th><th>Cleared By</th>' +
+    '</tr></thead><tbody>' +
+    displayRows.map(function(row) {
+      return '<tr>' +
+        '<td>' + renderSourcePill(row.source) + '</td>' +
+        '<td style="font-family:monospace;font-size:12px">' + escapeHtml(row.batchNo) + '</td>' +
+        '<td style="font-weight:600">' + escapeHtml(row.batchName) + '</td>' +
+        '<td>' + escapeHtml(row.colour || '—') + '</td>' +
+        '<td>' + escapeHtml(row.masterBatchSize || '—') + '</td>' +
+        '<td>' + escapeHtml(row.childBatchSize || '—') + '</td>' +
+        '<td>' + escapeHtml(row.packSize || '—') + '</td>' +
+        '<td>' + escapeHtml(row.foilSize || '—') + '</td>' +
+        '<td>' + escapeHtml(row.mrp || '—') + '</td>' +
+        '<td>' + PM_ITEMS.map(function(item) { return '<span class="pill pg2" style="margin:1px;font-size:9px">' + item + '</span>'; }).join('') + '</td>' +
+        '<td style="font-size:12px;color:var(--muted)">' + escapeHtml(row.updBy || '—') + '</td>' +
+        '</tr>';
+    }).join('') +
+    '</tbody></table>' + (displayRows.length === 0 ? '<div class="empty"><div class="ei">◯</div><p>No batches ready for this filter.</p></div>' : '') + '</div></div>';
+  document.getElementById('mc').innerHTML = html;
+}
 
-  function filt(inp,tid){
-    let q=inp.value.toLowerCase();
-    document.querySelectorAll('#'+tid+' tbody tr').forEach(tr=>tr.style.display=tr.textContent.toLowerCase().includes(q)?'':'none');
+function renderOrdersLog() {
+  var html = '<div class="tbox"><div class="th2"><div class="tt">Orders Log</div><input class="ts2" placeholder="Search..." oninput="filterTable(this,\'t-log2\')"></div>' +
+    '<div class="tsc"><table id="t-log2"><thead><tr>' +
+    '<th>Order ID</th><th>Batch No</th><th>Batch Name</th><th>Item</th><th>Qty</th>' +
+    '<th>Ordered By</th><th>Timestamp</th><th>Status</th>' +
+    '</tr></thead><tbody>' +
+    orders.slice().reverse().map(function(order) {
+      var statusClass = order['Order Status'] === 'Received' ? 'pg2' : order['Order Status'] === 'Ordered' ? 'pb2' : 'pz2';
+      return '<tr>' +
+        '<td style="font-family:monospace;font-size:10px;color:var(--muted)">' + escapeHtml(order['Order ID'] || '—') + '</td>' +
+        '<td style="font-size:12px">' + escapeHtml(order['Batch No'] || '—') + '</td>' +
+        '<td style="font-weight:600">' + escapeHtml(order['Batch Name'] || '—') + '</td>' +
+        '<td><span class="pill pr2" style="font-size:9px">' + escapeHtml(order['Missing Items'] || '—') + '</span></td>' +
+        '<td>' + escapeHtml(order['Order Qty'] || '—') + '</td>' +
+        '<td>' + escapeHtml(order['Ordered By'] || '—') + '</td>' +
+        '<td style="font-size:11px;color:var(--muted)">' + escapeHtml(order['Timestamp'] || '—') + '</td>' +
+        '<td><span class="pill ' + statusClass + '">' + escapeHtml(order['Order Status'] || '—') + '</span></td>' +
+        '</tr>';
+    }).join('') +
+    '</tbody></table>' + (orders.length === 0 ? '<div class="empty"><p>No orders placed yet.</p></div>' : '') + '</div></div>';
+  document.getElementById('mc').innerHTML = html;
+}
+
+function openOrderModal(id, source, batchNo, batchName, missingItemsStr) {
+  mId = id;
+  mMiss = missingItemsStr.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+  mRowData = planning.find(function(row) { return row.id === id; });
+  
+  document.getElementById('m-prod').textContent = '📋 ' + batchName + ' | Batch: ' + batchNo + ' | Source: ' + source;
+  
+  var itemsHtml = '';
+  mMiss.forEach(function(item, index) {
+    itemsHtml += '<div class="order-item-row">' +
+      '<div class="order-item-name"><span class="dot dr"></span> ' + item + '</div>' +
+      '<input type="number" class="order-item-qty" id="m-qty-' + index + '" placeholder="Qty" min="1" data-item="' + item + '">' +
+      '<span style="font-size:10px;color:var(--muted);white-space:nowrap">pcs/units</span>' +
+      '</div>';
+  });
+  
+  document.getElementById('m-items-container').innerHTML = itemsHtml;
+  document.getElementById('m-rmk').value = '';
+  document.getElementById('m-download-section').innerHTML = '';
+  document.getElementById('btn-place-order').disabled = false;
+  document.getElementById('btn-place-order').textContent = '✅ Place Orders & Download Excel';
+  document.getElementById('modal').classList.add('on');
+}
+
+function closeMod() {
+  document.getElementById('modal').classList.remove('on');
+  mId = null;
+  mRowData = null;
+}
+
+function doOrder() {
+  var itemsWithQuantity = [];
+  var allFieldsValid = true;
+  
+  mMiss.forEach(function(item, index) {
+    var quantityInput = document.getElementById('m-qty-' + index);
+    var quantity = quantityInput ? parseInt(quantityInput.value) : 0;
+    if (!quantity || quantity < 1) {
+      if (quantityInput) quantityInput.style.borderColor = 'var(--red)';
+      allFieldsValid = false;
+    } else {
+      if (quantityInput) quantityInput.style.borderColor = 'var(--border)';
+      itemsWithQuantity.push({ item: item, qty: quantity });
+    }
+  });
+  
+  if (!allFieldsValid) {
+    showToast('Please enter valid quantity for ALL items (minimum 1)', 'er');
+    return;
   }
-  function sp(s){
-    let l=s==='Tablet'?'Tablet':s==='Capsule'?'Capsule':'Oncology';
-    let c=s==='Tablet'?'pb2':s==='Capsule'?'pg2':'pa2';
-    return `<span class="pill ${c}">${l}</span>`;
-  }
-  function stpill(s){
-    if(s==='READY FOR PACKING') return '<span class="pill pg2"><span class="dot dg"></span>Ready</span>';
-    if(s==='PENDING') return '<span class="pill pr2"><span class="dot dr"></span>Pending</span>';
-    return '<span class="pill pz2">Incomplete</span>';
-  }
-  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  function ej(s){ return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
-  function toast(msg,type){
-    let e=document.getElementById('toast'); e.textContent=msg; e.className='on '+(type||'');
-    setTimeout(()=>{ e.className=''; },3500);
-  }
+  
+  if (!mId || !mRowData) return;
+  
+  var placeOrderButton = document.getElementById('btn-place-order');
+  placeOrderButton.textContent = '⏳ Placing orders...';
+  placeOrderButton.disabled = true;
+  
+  var remarks = document.getElementById('m-rmk').value.trim();
+  
+  callApi('placeMultiOrder', {
+    source: mRowData.source,
+    batchNo: mRowData.batchNo,
+    batchName: mRowData.batchName,
+    childBatchSize: mRowData.childBatchSize || '',
+    packSize: mRowData.packSize || '',
+    items: itemsWithQuantity,
+    orderedBy: USER,
+    remarks: remarks
+  })
+  .then(function(response) {
+    if (response.success) {
+      showToast('✅ ' + itemsWithQuantity.length + ' orders placed successfully!', 'ok');
+      
+      if (response.orders) {
+        response.orders.forEach(function(order) { orders.push(order); });
+      }
+      
+      var downloadHtml = '<div class="download-section">';
+      if (response.downloadUrl) {
+        downloadHtml += '<a class="download-link" href="' + response.downloadUrl + '" target="_blank">📥 Download Order Excel</a> ';
+      }
+      downloadHtml += '<p style="font-size:10px;color:var(--muted);margin-top:6px;">Order IDs: ' + (response.orderIds || []).join(', ') + '</p>';
+      downloadHtml += '</div>';
+      
+      document.getElementById('m-download-section').innerHTML = downloadHtml;
+      placeOrderButton.textContent = '✅ Orders Placed Successfully!';
+      
+      setTimeout(function() { closeMod(); }, 3000);
+    } else {
+      showToast('Order failed: ' + (response.error || 'Unknown error'), 'er');
+      placeOrderButton.textContent = '✅ Place Orders & Download Excel';
+      placeOrderButton.disabled = false;
+    }
+  })
+  .catch(function(error) {
+    showToast('Error: ' + error.message, 'er');
+    placeOrderButton.textContent = '✅ Place Orders & Download Excel';
+    placeOrderButton.disabled = false;
+  });
+}
+
+document.getElementById('modal').addEventListener('click', function(event) {
+  if (event.target === this) closeMod();
+});
+
+function filterTable(inputElement, tableId) {
+  var query = inputElement.value.toLowerCase();
+  document.querySelectorAll('#' + tableId + ' tbody tr').forEach(function(row) {
+    row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+  });
+}
+
+function renderSourcePill(source) {
+  var label = source === 'Tablet' ? 'Tablet' : source === 'Capsule' ? 'Capsule' : 'Oncology';
+  var cssClass = source === 'Tablet' ? 'pb2' : source === 'Capsule' ? 'pg2' : 'pa2';
+  return '<span class="pill ' + cssClass + '">' + label + '</span>';
+}
+
+function renderStatusPill(status) {
+  if (status === 'READY FOR PACKING') return '<span class="pill pg2"><span class="dot dg"></span>Ready</span>';
+  if (status === 'PENDING') return '<span class="pill pr2"><span class="dot dr"></span>Pending</span>';
+  return '<span class="pill pz2">Incomplete</span>';
+}
+
+function escapeHtml(text) {
+  return String(text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function escapeJs(text) {
+  return String(text || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
+function showToast(message, type) {
+  var toastElement = document.getElementById('toast');
+  toastElement.textContent = message;
+  toastElement.className = 'on ' + (type || '');
+  setTimeout(function() { toastElement.className = ''; }, 3500);
+}
 </script>
 </body>
 </html>
